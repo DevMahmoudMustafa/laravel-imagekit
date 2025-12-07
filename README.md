@@ -137,7 +137,7 @@ The ImageKit package provides a comprehensive set of features for image manageme
 Install the package using Composer:
 
 ```bash
-composer require devmahmoudmustafa/imagekit
+composer require devmahmoudmustafa/laravel-imagekit
 ```
 
 ### Step 2: Publish the Configuration File

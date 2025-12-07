@@ -1171,7 +1171,7 @@ try {
 
 ## Support and Contribution
 
-For support or to contribute to this package, visit the [GitHub repository](https://github.com/devmahmoudmustafa/imagekit).
+For support or to contribute to this package, visit the [GitHub repository](https://github.com/devmahmoudmustafa/laravel-imagekit).
 
 ## License
 

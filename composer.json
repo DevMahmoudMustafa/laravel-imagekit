@@ -1,0 +1,75 @@
+{
+    "name": "devmahmoudmustafa/laravel-imagekit",
+    "description": "Laravel ImageKit is a comprehensive image processing package for Laravel. It provides an easy-to-use service for validating, resizing, compressing, watermarking, and storing images, all with minimal configuration and maximum flexibility. Perfect for managing image assets in your Laravel applications.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "DevMahmoudMustafa\\ImageKit\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DevMahmoudMustafa\\ImageKit\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mahmoud Mustafa",
+            "email": "dev.mahmoud.mustafa@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^9.0|^10.0|^11.0|^12.0",
+        "intervention/image": "^2.7"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0|^10.0",
+        "phpunit/phpunit": "^10.0|^11.0"
+    },
+    "suggest": {
+        "ramsey/uuid": "Required for UUID file naming strategy (^4.0|^5.0)"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DevMahmoudMustafa\\ImageKit\\Providers\\ImageKitServiceProvider"
+            ],
+            "aliases": {
+                "ImageKit": "DevMahmoudMustafa\\ImageKit\\Facades\\ImageKit"
+            }
+        }
+    },
+    "keywords": [
+        "laravel",
+        "image",
+        "images",
+        "image-processing",
+        "image-manipulation",
+        "image-resize",
+        "image-resizing",
+        "image-compress",
+        "image-compression",
+        "image-watermark",
+        "image-watermarking",
+        "image-upload",
+        "image-uploader",
+        "image-storage",
+        "image-validation",
+        "image-gallery",
+        "intervention-image",
+        "storage",
+        "upload",
+        "resize",
+        "compress",
+        "watermark",
+        "thumbnail",
+        "imagekit",
+        "laravel-imagekit",
+        "image-kit",
+        "php",
+        "laravel-package"
+    ]
+}

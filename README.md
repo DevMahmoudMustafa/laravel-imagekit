@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/DevMahmoudMustafa/laravel-imagekit/main/assets/imageKit.png" width="600" alt="Laravel ImageKit">
+  <img src="https://raw.githubusercontent.com/DevMahmoudMustafa/laravel-imagekit/main/assets/imageKit.png"  alt="Laravel ImageKit">
 </p>
 
 

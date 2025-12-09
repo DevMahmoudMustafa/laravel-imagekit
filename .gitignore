@@ -6,6 +6,5 @@ composer.lock
 *.log
 .DS_Store
 Thumbs.db
-create_repo.sh
-GITHUB_SETUP.md
-QUICK_PUSH.sh
+.secrets
+.phpunit.cache

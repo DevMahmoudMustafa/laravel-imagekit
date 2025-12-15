@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/DevMahmoudMustafa/laravel-imagekit/main/assets/imageKit.png"  alt="Laravel ImageKit">
+</p>
+
+
 # Laravel ImageKit
 
 [![Latest Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://packagist.org/packages/devmahmoudmustafa/laravel-imagekit)

@@ -367,4 +367,22 @@ class StorageService
     {
         return time() . '_' . Str::random(16);
     }
+
+    /**
+     * Get file size in bytes.
+     *
+     * @param string $path Relative path on the storage disk
+     * @param string|null $disk Optional disk name. If not provided, uses current disk.
+     * @return int
+     */
+    public function getFileSize(string $path, ?string $disk = null): int
+    {
+        $disk = $disk ?? $this->disk;
+
+        if (!Storage::disk($disk)->exists($path)) {
+            return 0;
+        }
+
+        return Storage::disk($disk)->size($path);
+    }
 }

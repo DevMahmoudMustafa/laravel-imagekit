@@ -430,4 +430,219 @@ class ImageKitServiceTest extends TestCase
 
         $this->assertNotNull($imageName);
     }
+
+    /** @test */
+    public function it_returns_only_name_by_default()
+    {
+        config(['imagekit.return_keys' => ['name']]);
+
+        $image = UploadedFile::fake()->image('test.jpg', 800, 600);
+        $result = ImageKit::image($image)->save();
+
+        $this->assertIsString($result);
+        $this->assertStringEndsWith('.jpg', $result);
+    }
+
+    /** @test */
+    public function it_returns_array_when_multiple_keys_configured()
+    {
+        config(['imagekit.return_keys' => ['name', 'path', 'size']]);
+
+        $image = UploadedFile::fake()->image('test.jpg', 800, 600);
+        $result = ImageKit::image($image)->save();
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('name', $result);
+        $this->assertArrayHasKey('path', $result);
+        $this->assertArrayHasKey('size', $result);
+    }
+
+    /** @test */
+    public function it_returns_all_available_keys()
+    {
+        config(['imagekit.return_keys' => [
+            'name', 'path', 'full_path', 'size', 'original_size',
+            'url', 'extension', 'mime_type', 'width', 'height',
+            'disk', 'hash', 'created_at'
+        ]]);
+
+        $image = UploadedFile::fake()->image('test.jpg', 800, 600);
+        $result = ImageKit::image($image)->save();
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('name', $result);
+        $this->assertArrayHasKey('path', $result);
+        $this->assertArrayHasKey('full_path', $result);
+        $this->assertArrayHasKey('size', $result);
+        $this->assertArrayHasKey('original_size', $result);
+        $this->assertArrayHasKey('url', $result);
+        $this->assertArrayHasKey('extension', $result);
+        $this->assertArrayHasKey('mime_type', $result);
+        $this->assertArrayHasKey('width', $result);
+        $this->assertArrayHasKey('height', $result);
+        $this->assertArrayHasKey('disk', $result);
+        $this->assertArrayHasKey('hash', $result);
+        $this->assertArrayHasKey('created_at', $result);
+    }
+
+    /** @test */
+    public function it_returns_correct_extension()
+    {
+        config(['imagekit.return_keys' => ['name', 'extension', 'mime_type']]);
+
+        $image = UploadedFile::fake()->image('test.jpg', 800, 600);
+        $result = ImageKit::image($image)->save();
+
+        $this->assertEquals('jpg', $result['extension']);
+        $this->assertEquals('image/jpeg', $result['mime_type']);
+    }
+
+    /** @test */
+    public function it_returns_correct_dimensions()
+    {
+        config(['imagekit.return_keys' => ['name', 'width', 'height']]);
+
+        $image = UploadedFile::fake()->image('test.jpg', 800, 600);
+        $result = ImageKit::image($image)->save();
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('width', $result);
+        $this->assertArrayHasKey('height', $result);
+    }
+
+    /** @test */
+    public function it_returns_size_in_kb()
+    {
+        config(['imagekit.return_keys' => ['name', 'size', 'original_size']]);
+
+        $image = UploadedFile::fake()->image('test.jpg', 800, 600);
+        $result = ImageKit::image($image)->save();
+
+        $this->assertIsArray($result);
+        $this->assertIsFloat($result['size']);
+        $this->assertIsFloat($result['original_size']);
+    }
+
+    /** @test */
+    public function it_returns_correct_disk()
+    {
+        config(['imagekit.return_keys' => ['name', 'disk']]);
+
+        $image = UploadedFile::fake()->image('test.jpg', 800, 600);
+        $result = ImageKit::image($image)->save();
+
+        $this->assertEquals('public', $result['disk']);
+    }
+
+    /** @test */
+    public function it_returns_hash()
+    {
+        config(['imagekit.return_keys' => ['name', 'hash']]);
+
+        $image = UploadedFile::fake()->image('test.jpg', 800, 600);
+        $result = ImageKit::image($image)->save();
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('hash', $result);
+        $this->assertEquals(32, strlen($result['hash'])); // MD5 hash is 32 characters
+    }
+
+    /** @test */
+    public function it_returns_created_at_timestamp()
+    {
+        config(['imagekit.return_keys' => ['name', 'created_at']]);
+
+        $image = UploadedFile::fake()->image('test.jpg', 800, 600);
+        $result = ImageKit::image($image)->save();
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('created_at', $result);
+        $this->assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $result['created_at']);
+    }
+
+    /** @test */
+    public function it_returns_single_value_as_string_for_one_key()
+    {
+        config(['imagekit.return_keys' => ['url']]);
+
+        $image = UploadedFile::fake()->image('test.jpg', 800, 600);
+        $result = ImageKit::image($image)->save();
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('uploads/images', $result);
+    }
+
+    /** @test */
+    public function gallery_returns_array_with_return_keys()
+    {
+        config(['imagekit.return_keys' => ['name', 'size', 'url']]);
+
+        $images = [
+            UploadedFile::fake()->image('test1.jpg', 800, 600),
+            UploadedFile::fake()->image('test2.jpg', 800, 600),
+        ];
+
+        $result = ImageKit::images($images)->saveGallery();
+
+        $this->assertCount(2, $result);
+        $this->assertIsArray($result[0]);
+        $this->assertArrayHasKey('name', $result[0]);
+        $this->assertArrayHasKey('size', $result[0]);
+        $this->assertArrayHasKey('url', $result[0]);
+    }
+
+    /** @test */
+    public function gallery_returns_strings_when_single_key()
+    {
+        config(['imagekit.return_keys' => ['name']]);
+
+        $images = [
+            UploadedFile::fake()->image('test1.jpg', 800, 600),
+            UploadedFile::fake()->image('test2.jpg', 800, 600),
+        ];
+
+        $result = ImageKit::images($images)->saveGallery();
+
+        $this->assertCount(2, $result);
+        $this->assertIsString($result[0]);
+        $this->assertIsString($result[1]);
+    }
+
+    /** @test */
+    public function gallery_with_metadata_includes_return_keys()
+    {
+        config(['imagekit.return_keys' => ['name', 'size', 'width', 'height']]);
+
+        $images = [
+            UploadedFile::fake()->image('test1.jpg', 800, 600),
+            UploadedFile::fake()->image('test2.jpg', 800, 600),
+        ];
+
+        $result = ImageKit::images($images)->saveGallery('image_name', 'product_id', 123);
+
+        $this->assertCount(2, $result);
+        $this->assertArrayHasKey('image_name', $result[0]);
+        $this->assertArrayHasKey('product_id', $result[0]);
+        $this->assertArrayHasKey('name', $result[0]);
+        $this->assertArrayHasKey('size', $result[0]);
+        $this->assertArrayHasKey('width', $result[0]);
+        $this->assertArrayHasKey('height', $result[0]);
+        $this->assertEquals(123, $result[0]['product_id']);
+    }
+
+    /** @test */
+    public function it_returns_original_size_different_from_final_size_after_compression()
+    {
+        config(['imagekit.return_keys' => ['name', 'size', 'original_size']]);
+
+        $image = UploadedFile::fake()->image('test.jpg', 800, 600);
+        $result = ImageKit::image($image)->compress(true, 50)->save();
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('size', $result);
+        $this->assertArrayHasKey('original_size', $result);
+        // Both should be numeric (KB)
+        $this->assertIsNumeric($result['size']);
+        $this->assertIsNumeric($result['original_size']);
+    }
 }

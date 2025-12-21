@@ -116,7 +116,14 @@ The ImageKit package provides a comprehensive set of features for image manageme
 - **Event Listeners** - Full Laravel event system integration
 - **Custom Logic** - Hook into image processing workflow
 
-### 🛠️ Configuration & Customization
+### � Flexible Return Data
+- **Configurable Return Keys** - Choose exactly what data to return after saving
+- **Single or Multiple Keys** - Return string for one key, array for multiple
+- **Image Metadata** - Get name, path, size, dimensions, URL, hash, and more
+- **Size Tracking** - Track both original and final file sizes (in KB)
+- **Compression Analysis** - Compare sizes before and after modifications
+
+### �🛠️ Configuration & Customization
 - **Comprehensive Config** - Extensive configuration file for all settings
 - **Default Values** - Sensible defaults that work out of the box
 - **Runtime Configuration** - Override defaults at runtime
@@ -227,6 +234,9 @@ return [
     
     // Watermark storage path (for uploaded watermarks)
     'watermark_storage_path' => 'watermarks',
+    
+    // Return keys - specify which data to return after saving
+    'return_keys' => ['name'],
 ];
 ```
 
@@ -290,6 +300,28 @@ Default watermark settings:
 
 #### `watermark_storage_path`
 Default path where uploaded watermark images are saved (relative to disk root). This path is used when you pass an `UploadedFile` as the watermark image.
+
+#### `return_keys`
+Specify which data to return after saving an image. Available keys:
+- `name` - Image filename
+- `path` - Directory path
+- `full_path` - Full path (path + name)
+- `size` - Final file size in KB (after all modifications)
+- `original_size` - Original file size in KB (before modifications)
+- `url` - Full URL to the image
+- `extension` - File extension (jpg, png, webp, etc.)
+- `mime_type` - MIME type (image/jpeg, image/png, etc.)
+- `width` - Image width in pixels
+- `height` - Image height in pixels
+- `disk` - Storage disk name
+- `hash` - MD5 hash of the file
+- `created_at` - Timestamp when saved
+
+**Behavior:**
+- If one key is specified → returns a `string` (or appropriate type)
+- If multiple keys are specified → returns an `array`
+
+**Default:** `['name']` (returns only the image name as string)
 
 ---
 
@@ -699,14 +731,22 @@ $currentDisk = ImageKit::getDisk();
 #### `saveImage()` / `save()`
 Save the image after applying all modifications.
 
-**Returns:** `string` - Image filename
+**Returns:** `string|array` - Based on `return_keys` config:
+- Single key → `string` (or appropriate type)
+- Multiple keys → `array` with requested data
 
 **Example:**
 ```php
+// Default (return_keys = ['name'])
 $imageName = ImageKit::image($image)
     ->resize(800, 600)
     ->compress(85)
     ->save();
+// Returns: "image_123456.jpg"
+
+// With multiple keys (return_keys = ['name', 'size', 'url'])
+$result = ImageKit::image($image)->save();
+// Returns: ['name' => 'image_123456.jpg', 'size' => 150.25, 'url' => 'http://...']
 ```
 
 #### `saveGallery($imageColumnName, $fkColumnName, $fkId, $altText)`
@@ -718,13 +758,24 @@ Save multiple images as a gallery.
 - `$fkId` - Foreign key value (optional)
 - `$altText` - Alt text - can be string or array (optional)
 
-**Returns:** `array` - Array of image names or array of database rows
+**Returns:** `array` - Array of results based on `return_keys` config:
+- Single key without metadata → array of strings
+- Multiple keys or with metadata → array of arrays
 
 **Example:**
 ```php
-// Simple gallery
+// Simple gallery (return_keys = ['name'])
 $images = ImageKit::images($request->file('gallery'))
     ->saveGallery();
+// Returns: ['image1.jpg', 'image2.jpg']
+
+// Simple gallery (return_keys = ['name', 'size', 'url'])
+$images = ImageKit::images($request->file('gallery'))
+    ->saveGallery();
+// Returns: [
+//     ['name' => 'image1.jpg', 'size' => 150.25, 'url' => '...'],
+//     ['name' => 'image2.jpg', 'size' => 200.50, 'url' => '...']
+// ]
 
 // With database metadata
 $rows = ImageKit::images($request->file('gallery'))
@@ -918,6 +969,78 @@ ImageKit::setDisk('public')
 ImageKit::setDisk('s3')
     ->images($cloudImages)
     ->saveGallery();
+```
+
+### Example 8.1: Custom Return Keys
+
+```php
+// Configure in config/imagekit.php:
+// 'return_keys' => ['name', 'size', 'original_size', 'url']
+
+$result = ImageKit::image($request->file('image'))
+    ->resize(800, 600)
+    ->compress(85)
+    ->save();
+
+// Returns:
+// [
+//     'name' => 'image_123456.jpg',
+//     'size' => 45.50,           // KB (after compression)
+//     'original_size' => 150.25, // KB (before compression)
+//     'url' => 'http://example.com/storage/uploads/images/image_123456.jpg'
+// ]
+```
+
+### Example 8.2: Get All Image Metadata
+
+```php
+// Configure in config/imagekit.php:
+// 'return_keys' => ['name', 'path', 'full_path', 'size', 'original_size', 'url', 'extension', 'mime_type', 'width', 'height', 'disk', 'hash', 'created_at']
+
+$result = ImageKit::image($request->file('image'))->save();
+
+// Returns all available data:
+// [
+//     'name' => 'image_123456.jpg',
+//     'path' => 'uploads/images',
+//     'full_path' => 'uploads/images/image_123456.jpg',
+//     'size' => 45.50,
+//     'original_size' => 150.25,
+//     'url' => 'http://example.com/storage/uploads/images/image_123456.jpg',
+//     'extension' => 'jpg',
+//     'mime_type' => 'image/jpeg',
+//     'width' => 800,
+//     'height' => 600,
+//     'disk' => 'public',
+//     'hash' => 'a1b2c3d4e5f6...',
+//     'created_at' => '2024-01-15 10:30:00'
+// ]
+```
+
+### Example 8.3: Gallery with Return Keys
+
+```php
+// Configure: 'return_keys' => ['name', 'size', 'width', 'height']
+
+$results = ImageKit::images($request->file('gallery'))
+    ->resize(800, 600)
+    ->saveGallery();
+
+// Returns:
+// [
+//     ['name' => 'img1.jpg', 'size' => 45.50, 'width' => 800, 'height' => 600],
+//     ['name' => 'img2.jpg', 'size' => 52.30, 'width' => 800, 'height' => 600],
+// ]
+
+// With database metadata
+$rows = ImageKit::images($request->file('gallery'))
+    ->saveGallery('image_name', 'product_id', 123);
+
+// Returns:
+// [
+//     ['image_name' => 'img1.jpg', 'product_id' => 123, 'name' => 'img1.jpg', 'size' => 45.50, ...],
+//     ['image_name' => 'img2.jpg', 'product_id' => 123, 'name' => 'img2.jpg', 'size' => 52.30, ...],
+// ]
 ```
 
 ### Example 9: Display Image in Browser

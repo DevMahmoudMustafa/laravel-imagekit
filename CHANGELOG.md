@@ -7,6 +7,53 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ---
 
+## [1.1.0] - 2025-12-21
+### ✨ New Features
+
+#### 📊 Configurable Return Keys
+Added `return_keys` configuration option to customize what data is returned after saving an image.
+
+**Available Keys:**
+- `name` - Image filename
+- `path` - Directory path
+- `full_path` - Full path (path + name)
+- `size` - Final file size in KB (after all modifications)
+- `original_size` - Original file size in KB (before modifications)
+- `url` - Full URL to the image
+- `extension` - File extension (jpg, png, webp, etc.)
+- `mime_type` - MIME type (image/jpeg, image/png, etc.)
+- `width` - Image width in pixels
+- `height` - Image height in pixels
+- `disk` - Storage disk name
+- `hash` - MD5 hash of the file
+- `created_at` - Timestamp when saved
+
+**Behavior:**
+- Single key → returns `string` (or appropriate type)
+- Multiple keys → returns `array`
+- Default: `['name']` (backward compatible)
+
+**Example:**
+```php
+// config/imagekit.php
+'return_keys' => ['name', 'size', 'original_size', 'url'],
+
+// Result:
+[
+    'name' => 'image_123.jpg',
+    'size' => 45.50,           // KB after compression
+    'original_size' => 150.25, // KB before compression
+    'url' => 'http://example.com/storage/...'
+]
+```
+
+### 🔧 Improvements
+- `save()` and `saveImage()` now return `string|array` based on config
+- `saveGallery()` now includes return keys data in results
+- Added comprehensive unit tests for return_keys feature
+
+---
+
 ## [1.0.0] - 2025-01-XX
 ### 🎉 Initial Release (First Public Version)
 

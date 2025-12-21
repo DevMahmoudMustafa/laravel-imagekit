@@ -427,6 +427,9 @@ class ImageHandler implements ImageHandlerInterface
         // Save the original image
         ['image' => $image, 'imageName' => $imageName, 'fullPath' => $fullPath] = $this->storageService->saveOriginal($this->image, $this->savedPath, $this->imageName, $this->extension);
 
+        // Get original size before any modifications
+        $originalSize = $this->storageService->getFileSize($fullPath);
+
         // Resize the image if dimensions are specified
         if (is_array($this->dimensions) && count($this->dimensions) > 0 && ($this->dimensions['width'] || $this->dimensions['height'])) {
             $this->resizeService->setDimensionsImage($fullPath, $this->dimensions, $this->aspectRatio);
@@ -450,7 +453,137 @@ class ImageHandler implements ImageHandlerInterface
         // Fire ImageSaved event
         Event::dispatch(new ImageSaved($imageName, $this->savedPath, $fullPath ?? ($this->savedPath . '/' . $imageName)));
 
-        return $imageName;
+        return $this->buildReturnData($imageName, $this->savedPath, $fullPath, $originalSize);
+    }
+
+    /**
+     * Build return data based on config return_keys.
+     *
+     * @param string $imageName
+     * @param string $path
+     * @param string $fullPath
+     * @param int $originalSize
+     * @return string|array
+     */
+    protected function buildReturnData(string $imageName, string $path, string $fullPath, int $originalSize): string|array
+    {
+        $returnKeys = config('imagekit.return_keys', ['name']);
+
+        // Get final file size (after all modifications)
+        $size = $this->storageService->getFileSize($fullPath);
+
+        // Get URL
+        $url = $this->storageService->url($fullPath);
+
+        // Get extension
+        $extension = pathinfo($imageName, PATHINFO_EXTENSION);
+
+        // Get mime type
+        $mimeType = $this->getMimeType($extension);
+
+        // Get image dimensions
+        $imageDimensions = $this->getImageDimensions($fullPath);
+
+        // Get disk
+        $disk = $this->storageService->getDisk();
+
+        // Get hash
+        $hash = $this->getFileHash($fullPath);
+
+        // Available data
+        $availableData = [
+            'name' => $imageName,
+            'path' => $path,
+            'full_path' => $fullPath,
+            'size' => round($size / 1024, 2),
+            'original_size' => round($originalSize / 1024, 2),
+            'url' => $url,
+            'extension' => $extension,
+            'mime_type' => $mimeType,
+            'width' => $imageDimensions['width'],
+            'height' => $imageDimensions['height'],
+            'disk' => $disk,
+            'hash' => $hash,
+            'created_at' => now()->toDateTimeString(),
+        ];
+
+        // If only one key, return string
+        if (count($returnKeys) === 1) {
+            $key = $returnKeys[0];
+            return $availableData[$key] ?? $imageName;
+        }
+
+        // If multiple keys, return array
+        $result = [];
+        foreach ($returnKeys as $key) {
+            if (isset($availableData[$key])) {
+                $result[$key] = $availableData[$key];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get MIME type from extension.
+     *
+     * @param string $extension
+     * @return string
+     */
+    protected function getMimeType(string $extension): string
+    {
+        $extension = strtolower($extension);
+
+        return match ($extension) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+            'bmp' => 'image/bmp',
+            'ico' => 'image/x-icon',
+            default => 'application/octet-stream',
+        };
+    }
+
+    /**
+     * Get image dimensions (width and height).
+     *
+     * @param string $fullPath
+     * @return array
+     */
+    protected function getImageDimensions(string $fullPath): array
+    {
+        $absolutePath = $this->storageService->path($fullPath);
+
+        if (file_exists($absolutePath)) {
+            $imageInfo = @getimagesize($absolutePath);
+            if ($imageInfo) {
+                return [
+                    'width' => $imageInfo[0],
+                    'height' => $imageInfo[1],
+                ];
+            }
+        }
+
+        return ['width' => null, 'height' => null];
+    }
+
+    /**
+     * Get file MD5 hash.
+     *
+     * @param string $fullPath
+     * @return string|null
+     */
+    protected function getFileHash(string $fullPath): ?string
+    {
+        $absolutePath = $this->storageService->path($fullPath);
+
+        if (file_exists($absolutePath)) {
+            return md5_file($absolutePath);
+        }
+
+        return null;
     }
 
     /**

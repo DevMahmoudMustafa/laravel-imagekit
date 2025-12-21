@@ -110,9 +110,9 @@ class ImageKitService extends ImageHandler
      * Save the image after applying all modifications.
      * Automatically resets state after saving to prevent state pollution.
      *
-     * @return string
+     * @return string|array
      */
-    public function saveImage(): string
+    public function saveImage(): string|array
     {
         try {
             return $this->processingImage();
@@ -125,9 +125,9 @@ class ImageKitService extends ImageHandler
     /**
      * Alias for saveImage() - more fluent API.
      *
-     * @return string
+     * @return string|array
      */
-    public function save(): string
+    public function save(): string|array
     {
         return $this->saveImage();
     }
@@ -169,31 +169,39 @@ class ImageKitService extends ImageHandler
         $altTexts = is_array($altText) ? $altText : null;
         
         try {
-        foreach ($this->images as $index => $image) {
+            foreach ($this->images as $index => $image) {
                 $this->image = $image;
                 $this->imageName = null; // Reset name for each image
 
-                $imageName = $this->processingImage();
+                $result = $this->processingImage();
 
-            if ($imageColumnName) {
-                $row = [
-                    $imageColumnName => $imageName
-                ];
+                if ($imageColumnName) {
+                    // Extract image name from result (could be string or array)
+                    $imageName = is_array($result) ? ($result['name'] ?? $result) : $result;
+                    
+                    $row = [
+                        $imageColumnName => $imageName
+                    ];
 
-                if ($fkColumnName && $fkId) {
-                    $row[$fkColumnName] = $fkId;
-                }
+                    if ($fkColumnName && $fkId) {
+                        $row[$fkColumnName] = $fkId;
+                    }
 
                     // Support both single altText and array of altTexts
                     $currentAltText = $altTexts ? ($altTexts[$index] ?? null) : $altText;
                     if ($currentAltText) {
                         $row['alt'] = $currentAltText;
-                }
+                    }
 
-                $data[] = $row;
-            } else {
-                $data[] = $imageName;
-            }
+                    // Merge additional return keys if result is array
+                    if (is_array($result)) {
+                        $row = array_merge($row, $result);
+                    }
+
+                    $data[] = $row;
+                } else {
+                    $data[] = $result;
+                }
             }
         } finally {
             // Reset state after processing

@@ -12,9 +12,9 @@ class SaveSingleImageHandler extends ImageHandler implements SaveSingleImageHand
      * Save the image after applying all modifications.
      * Automatically resets state after saving to prevent state pollution.
      *
-     * @return string
+     * @return string|array
      */
-    public function saveImage(): string
+    public function saveImage(): string|array
     {
         try {
             return $this->processingImage();

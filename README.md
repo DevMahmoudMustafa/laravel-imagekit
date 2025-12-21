@@ -12,7 +12,7 @@
 
 ## Overview
 
-The **Laravel ImageKit** package (v1.0.0) is a comprehensive image management tool that allows developers to handle various image operations such as uploading, resizing, watermarking, compressing, and storing images. This package integrates seamlessly with Laravel's Storage system, providing full support for local storage, cloud storage (S3, GCS, Azure), and maximum flexibility for diverse use cases.
+The **Laravel ImageKit** package (v1.1.0) is a comprehensive image management tool that allows developers to handle various image operations such as uploading, resizing, watermarking, compressing, and storing images. This package integrates seamlessly with Laravel's Storage system, providing full support for local storage, cloud storage (S3, GCS, Azure), and maximum flexibility for diverse use cases.
 
 ---
 

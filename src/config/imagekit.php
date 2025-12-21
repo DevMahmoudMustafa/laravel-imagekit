@@ -193,4 +193,32 @@ return [
     |
     */
     'watermark_storage_path' => 'watermarks',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Return Keys
+    |--------------------------------------------------------------------------
+    |
+    | Specify which keys to return after saving an image.
+    | Available keys:
+    |   - 'name': Image filename
+    |   - 'path': Directory path
+    |   - 'full_path': Full path (path + name)
+    |   - 'size': Final file size in KB (after all modifications)
+    |   - 'original_size': Original file size in KB (before modifications)
+    |   - 'url': Full URL to the image
+    |   - 'extension': File extension (jpg, png, webp, etc.)
+    |   - 'mime_type': MIME type (image/jpeg, image/png, etc.)
+    |   - 'width': Image width in pixels
+    |   - 'height': Image height in pixels
+    |   - 'disk': Storage disk name
+    |   - 'hash': MD5 hash of the file
+    |   - 'created_at': Timestamp when saved
+    |
+    | - If one key is specified, returns a string (or appropriate type).
+    | - If multiple keys are specified, returns an array.
+    | Default: ['name'] (returns only the image name as string)
+    |
+    */
+    'return_keys' => ['name'],
 ];

@@ -105,6 +105,61 @@ class StorageServiceTest extends TestCase
     }
 
     /** @test */
+    public function it_can_delete_image_without_path_extracting_from_image_name()
+    {
+        Storage::disk('public')->put('uploads/images/test.jpg', 'fake content');
+        
+        $result = $this->service->deleteImage('uploads/images/test.jpg', null);
+        
+        $this->assertTrue($result);
+        Storage::disk('public')->assertMissing('uploads/images/test.jpg');
+    }
+
+    /** @test */
+    public function it_can_delete_image_with_empty_path_extracting_from_image_name()
+    {
+        Storage::disk('public')->put('uploads/images/test.jpg', 'fake content');
+        
+        $result = $this->service->deleteImage('uploads/images/test.jpg', '');
+        
+        $this->assertTrue($result);
+        Storage::disk('public')->assertMissing('uploads/images/test.jpg');
+    }
+
+    /** @test */
+    public function it_can_delete_resized_versions_when_path_extracted_from_image_name()
+    {
+        Storage::disk('public')->put('uploads/images/test.jpg', 'fake content');
+        Storage::disk('public')->put('uploads/images/small_test.jpg', 'fake content');
+        Storage::disk('public')->put('uploads/images/medium_test.jpg', 'fake content');
+        
+        $result = $this->service->deleteImage('uploads/images/test.jpg', null, ['small', 'medium']);
+        
+        $this->assertTrue($result);
+        Storage::disk('public')->assertMissing('uploads/images/test.jpg');
+        Storage::disk('public')->assertMissing('uploads/images/small_test.jpg');
+        Storage::disk('public')->assertMissing('uploads/images/medium_test.jpg');
+    }
+
+    /** @test */
+    public function it_throws_exception_when_image_is_in_root_directory()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Image name is in root directory: test.jpg');
+        
+        $this->service->deleteImage('test.jpg', null);
+    }
+
+    /** @test */
+    public function it_throws_exception_when_image_is_in_root_directory_with_empty_path()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Image name is in root directory: test.jpg');
+        
+        $this->service->deleteImage('test.jpg', '');
+    }
+
+    /** @test */
     public function it_can_get_url_for_image()
     {
         Storage::disk('public')->put('uploads/images/test.jpg', 'fake content');

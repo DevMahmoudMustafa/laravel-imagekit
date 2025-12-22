@@ -283,6 +283,44 @@ class ImageKitServiceTest extends TestCase
     }
 
     /** @test */
+    public function it_can_delete_image_without_path_extracting_from_image_name()
+    {
+        Storage::disk('public')->put('uploads/images/test.jpg', 'fake content');
+        
+        $result = ImageKit::deleteImage('uploads/images/test.jpg', null);
+
+        $this->assertTrue($result);
+        Storage::disk('public')->assertMissing('uploads/images/test.jpg');
+        Event::assertDispatched(ImageDeleted::class);
+    }
+
+    /** @test */
+    public function it_can_delete_gallery_without_path_extracting_from_image_names()
+    {
+        Storage::disk('public')->put('uploads/images/img1.jpg', 'fake content');
+        Storage::disk('public')->put('uploads/images/img2.jpg', 'fake content');
+        
+        $count = ImageKit::deleteGallery(
+            ['uploads/images/img1.jpg', 'uploads/images/img2.jpg'],
+            null
+        );
+
+        $this->assertEquals(2, $count);
+        Storage::disk('public')->assertMissing('uploads/images/img1.jpg');
+        Storage::disk('public')->assertMissing('uploads/images/img2.jpg');
+        Event::assertDispatched(ImageDeleted::class, 2);
+    }
+
+    /** @test */
+    public function it_throws_exception_when_deleting_image_in_root_directory()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Image name is in root directory: test.jpg');
+        
+        ImageKit::deleteImage('test.jpg', null);
+    }
+
+    /** @test */
     public function it_can_use_different_disk()
     {
         $image = UploadedFile::fake()->image('test.jpg');

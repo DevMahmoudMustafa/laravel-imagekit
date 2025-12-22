@@ -244,14 +244,27 @@ class StorageService
     /**
      * Delete an image.
      *
-     * @param string $imageName Image filename
-     * @param string $path Relative path on the storage disk
+     * @param string $imageName Image filename (can include full path if $path is null)
+     * @param string|null $path Relative path on the storage disk. If null or empty, path will be extracted from $imageName
      * @param array|null $sizes Array of size prefixes to delete
      * @return bool
+     * @throws \InvalidArgumentException If image is in root directory when path is extracted from imageName
      */
-    public function deleteImage(string $imageName, string $path, ?array $sizes = null): bool
+    public function deleteImage(string $imageName, ?string $path, ?array $sizes = null): bool
     {
         $deleted = false;
+
+
+        if ($path === null || $path === '') {
+            $path = dirname($imageName);
+            $imageName = basename($imageName);
+            // Handle case where imageName is in root (dirname returns '.' or '')
+            if ($path === '.' || $path === '') {
+               throw new \InvalidArgumentException("Image name is in root directory: {$imageName}");
+            }
+        }
+        
+        
         
         // Delete resized versions if sizes array is provided
         if (is_array($sizes) && count($sizes) > 0) {

@@ -817,32 +817,51 @@ ImageKit::reset()
 Delete a single image.
 
 **Parameters:**
-- `$imageName` - Image filename
-- `$path` - Path relative to disk root
+- `$imageName` - Image filename (can include full path if `$path` is null)
+- `$path` - Path relative to disk root (optional). If null or empty, path will be extracted from `$imageName`
 - `$sizes` - Array of sizes to delete (optional)
 
 **Returns:** `bool`
 
-**Example:**
+**Throws:** `InvalidArgumentException` if image is in root directory when path is extracted from imageName
+
+**Examples:**
 ```php
+// With explicit path
 $deleted = ImageKit::deleteImage('image.jpg', 'uploads/images', ['small', 'medium', 'large']);
+
+// Path extracted from imageName
+$deleted = ImageKit::deleteImage('uploads/images/image.jpg', null, ['small', 'medium', 'large']);
+
+// Path can be empty string (same as null)
+$deleted = ImageKit::deleteImage('uploads/images/image.jpg', '');
 ```
 
 #### `deleteGallery($imagesNames, $path, $sizes)`
 Delete multiple images.
 
 **Parameters:**
-- `$imagesNames` - Array of image filenames
-- `$path` - Path relative to disk root
+- `$imagesNames` - Array of image filenames (can include full paths if `$path` is null)
+- `$path` - Path relative to disk root (optional). If null or empty, path will be extracted from each `$imageName`
 - `$sizes` - Array of sizes to delete (optional)
 
 **Returns:** `int` - Number of successfully deleted images
 
-**Example:**
+**Throws:** `InvalidArgumentException` if any image is in root directory when path is extracted from imageName
+
+**Examples:**
 ```php
+// With explicit path
 $count = ImageKit::deleteGallery(
     ['image1.jpg', 'image2.jpg'],
     'uploads/images',
+    ['small', 'medium', 'large']
+);
+
+// Path extracted from imageNames
+$count = ImageKit::deleteGallery(
+    ['uploads/images/image1.jpg', 'uploads/images/image2.jpg'],
+    null,
     ['small', 'medium', 'large']
 );
 ```

@@ -228,12 +228,13 @@ class ImageKitService extends ImageHandler
     /**
      * Delete an image.
      *
-     * @param string $imageName
-     * @param string $path
+     * @param string $imageName Image filename (can include full path if $path is null)
+     * @param string|null $path Relative path on the storage disk. If null or empty, path will be extracted from $imageName
      * @param array|null $sizes Optional sizes array. If not provided, uses current resize settings.
      * @return bool
+     * @throws \InvalidArgumentException If image is in root directory when path is extracted from imageName
      */
-    public function deleteImage(string $imageName, string $path, ?array $sizes = null): bool
+    public function deleteImage(string $imageName, ?string $path = null, ?array $sizes = null): bool
     {
         $sizesToDelete = $sizes ?? ($this->resize ?? []);
         $success = $this->storageService->deleteImage($imageName, $path, $sizesToDelete);
@@ -248,12 +249,13 @@ class ImageKitService extends ImageHandler
     /**
      * Delete multiple images.
      *
-     * @param array $imageNames
-     * @param string $path
+     * @param array $imageNames Array of image filenames (can include full paths if $path is null)
+     * @param string|null $path Relative path on the storage disk. If null or empty, path will be extracted from each imageName
      * @param array|null $sizes Optional sizes array. If not provided, uses current resize settings.
      * @return int Number of successfully deleted images
+     * @throws \InvalidArgumentException If any image is in root directory when path is extracted from imageName
      */
-    public function deleteGallery(array $imagesNames, string $path, ?array $sizes = null): int
+    public function deleteGallery(array $imagesNames, ?string $path = null, ?array $sizes = null): int
     {
         $sizesToDelete = $sizes ?? ($this->resize ?? []);
         $countDelete = 0;

@@ -10,17 +10,17 @@ class ImageDeleted
     use Dispatchable, SerializesModels;
 
     public string $imageName;
-    public string $path;
+    public ?string $path;
     public bool $success;
 
     /**
      * Create a new event instance.
      *
      * @param string $imageName
-     * @param string $path
+     * @param string|null $path
      * @param bool $success
      */
-    public function __construct(string $imageName, string $path, bool $success)
+    public function __construct(string $imageName, ?string $path, bool $success)
     {
         $this->imageName = $imageName;
         $this->path = $path;

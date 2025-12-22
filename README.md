@@ -5,7 +5,7 @@
 
 # Laravel ImageKit
 
-[![Latest Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://packagist.org/packages/devmahmoudmustafa/laravel-imagekit)
+[![Latest Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://packagist.org/packages/devmahmoudmustafa/laravel-imagekit)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.2-blue.svg)](https://php.net)
 [![Laravel Version](https://img.shields.io/badge/laravel-%5E9.0%7C%5E10.0%7C%5E11.0%7C%5E12.0-red.svg)](https://laravel.com)
